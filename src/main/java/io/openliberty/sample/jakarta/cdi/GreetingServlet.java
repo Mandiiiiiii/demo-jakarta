@@ -9,6 +9,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.event.ObservesAsync;
+import jakarta.enterprise.inject.Disposes;
 import jakarta.enterprise.inject.Produces;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -31,13 +34,23 @@ public class GreetingServlet extends HttpServlet {
         return new GreetingNoDefaultConstructor("Howdy");
     }
 
+    @Produces
+    public GreetingNoDefaultConstructor getInstance(@Disposes String word) {
+        return new GreetingNoDefaultConstructor(word);
+    }
+    
+
+    public void close(@Disposes GreetingNoDefaultConstructor construct) {
+        System.out.println("constructor:" + construct.greet("Bob"));
+    }
+
     @Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		// use @Inject greeting
-        String greetingString = greeting.greet("Bob");
+        // String greetingString = greeting.greet("Bob");
 
         // use @Produces greeting
-        // String greetingString = getInstance().greet("Bob");
+        String greetingString = getInstance("Nothing").greet("Bob");
         
         res.setContentType("text/html;charset=UTF-8");
 		res.getWriter().println(greetingString);
